@@ -56,11 +56,13 @@
                           }
                       });
 
+                      var li = new Element('li');
                       if (gith.length > 0) {
-                         var li = new Element('li');
                          li.set('text', repo.name + ": " + gith.toString());
-                         $('repos').adopt(li);
+                      } else {
+                         li.set('text', repo.name + ": None of your " + repo.watchers + " watchers are githubbers.");
                       }
+                      $('repos').adopt(li);
                    }
                 });
             });
