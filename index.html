@@ -39,17 +39,17 @@
          });
 
          var githubbers = [];
+
+         function gh (d) {
+            d["users"].each(function(u) {
+               githubbers.push(u.login);
+            });
+         }
+
          new Request.JSON({
             "url": "https://github.com/api/v2/json/organizations/github/public_members",
             "method": "get",
-            "onSuccess": function(d) {
-               d["users"].each(function(u) {
-                  githubbers.push(u.login);
-               });
-            },
-         }).send();
-
-         console.log(githubbers);
+         }).send("callback=gh");
 
          $('form').addEvent('submit', function(ev) {
             ev.preventDefault();
