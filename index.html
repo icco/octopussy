@@ -11,10 +11,11 @@
              $('repocount').set('text', data.repositories.length);
 
              data.repositories.each(function(repo) {
+                r = gh.repo("icco", repo.name);
                 var li = new Element('li');
                 li.set('text', repo.name + ": " + repo.watchers + " watchers.");
                 $('repos').adopt(li);
-                console.log(repo.contributors);
+                console.log(r.contributors);
              });
          });
 
