@@ -28,9 +28,28 @@
       </div>
 
       <script type="text/javascript">
+         Array.implement({ 
+             intersection: function(array) {
+                 var clone = Array.clone(this);
+                 for (var i = 0, l = clone.length; i < l; i++){
+                     if (!array.contains(clone[i])) clone.erase(clone[i])
+                 }
+                 return clone;
+             }
+         });
 
-         // repos/show/:user/:repo/watchers
+         var githubbers = [];
+         new Request.JSON({
+            "url": "https://github.com/api/v2/json/organizations/github/public_members",
+            "method": "get",
+            "onSuccess": function(d) {
+               d["users"].each(function(u) {
+                  githubbers.push(u.login);
+               });
+            },
+         }).send();
 
+         console.log(githubbers);
 
          $('form').addEvent('submit', function(ev) {
             ev.preventDefault();
@@ -42,22 +61,25 @@
 
             user.repos(function (data) {
                 $('repocount').set('text', data.repositories.length);
+                var gh = [];
 
                 data.repositories.each(function(repo) {
-                   var li = new Element('li');
                    if (repo.watchers > 1) {
-                      var r = new Request.JSON({
-                         url: "http://github.com/api/v2/json/repos/show/" + user.username + "/" + repo.name + "/watchers",
-                         method: "get",
-                         onComplete: function(d) {
-                            console.log("complete", d);
+                      var options = {
+                         "url": "https://github.com/api/v2/json/repos/show/" + user.username + "/" + repo.name + "/watchers",
+                         "method": "get",
+                         "onSuccess": function(d) {
+                            gh = d["watchers"].intersect(githubbers);
                          },
-                     });
+                      };
 
-                      r.get();
+                      new Request.JSON(options).send();
 
-                     li.set('text', repo.name + ": " + repo.watchers + " watchers.");
-                     $('repos').adopt(li);
+                      if (gh.size() > 0) {
+                         var li = new Element('li');
+                         li.set('text', repo.name + ": " + gh.toString());
+                         $('repos').adopt(li);
+                      }
                    }
                 });
             });
