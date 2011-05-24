@@ -28,28 +28,12 @@
       </div>
 
       <script type="text/javascript">
-         Array.implement({ 
-             intersection: function(array) {
-                 var clone = Array.clone(this);
-                 for (var i = 0, l = clone.length; i < l; i++){
-                     if (!array.contains(clone[i])) clone.erase(clone[i])
-                 }
-                 return clone;
-             }
-         });
-
          var githubbers = [];
-
-         function gh (d) {
-            d["users"].each(function(u) {
+         gh.org("github").public_members(function(data) {
+            data.users.each(function(u) {
                githubbers.push(u.login);
             });
-         }
-
-         new Request.JSON({
-            "url": "https://github.com/api/v2/json/organizations/github/public_members",
-            "method": "get",
-         }).send("callback=gh");
+         });
 
          $('form').addEvent('submit', function(ev) {
             ev.preventDefault();
@@ -61,23 +45,20 @@
 
             user.repos(function (data) {
                 $('repocount').set('text', data.repositories.length);
-                var gh = [];
+                var gith = [];
 
                 data.repositories.each(function(repo) {
                    if (repo.watchers > 1) {
-                      var options = {
-                         "url": "https://github.com/api/v2/json/repos/show/" + user.username + "/" + repo.name + "/watchers",
-                         "method": "get",
-                         "onSuccess": function(d) {
-                            gh = d["watchers"].intersect(githubbers);
-                         },
-                      };
+                      gh.repo(user.username, repo.name).followers(function(d) {
+                          gith = Array.clone(d.watchers);
+                          for (var i = 0, l = gith.length; i < l; i++){
+                              if (!githubbers.contains(gith[i])) gith.erase(gith[i])
+                          }
+                      });
 
-                      new Request.JSON(options).send();
-
-                      if (gh.size() > 0) {
+                      if (gith.length > 0) {
                          var li = new Element('li');
-                         li.set('text', repo.name + ": " + gh.toString());
+                         li.set('text', repo.name + ": " + gith.toString());
                          $('repos').adopt(li);
                       }
                    }

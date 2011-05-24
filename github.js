@@ -289,6 +289,22 @@
         return this;
     };
 
+    // ### Organizations
+
+    gh.org = function (org) {
+        if ( !(this instanceof gh.org)) {
+            return new gh.org(org);
+        }
+        this.org = org;
+    };
+
+    gh.org.prototype.public_members = function (callback, context) {
+        jsonp("organizations/" + this.org + "/public_members",
+              callback,
+              context);
+        return this;
+    };
+
     // ### Repositories
 
     // This is the base constructor for creating repo objects. Note that this
