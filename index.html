@@ -28,6 +28,10 @@
       </div>
 
       <script type="text/javascript">
+
+         // repos/show/:user/:repo/watchers
+
+
          $('form').addEvent('submit', function(ev) {
             ev.preventDefault();
             $('repocount').set('text', "0")
@@ -35,21 +39,25 @@
             $('data').setStyle('display', 'block');
 
             var user = gh.user($("username").get("value"));
-            console.log(user);
 
             user.repos(function (data) {
                 $('repocount').set('text', data.repositories.length);
 
                 data.repositories.each(function(repo) {
-                   r = gh.repo("icco", repo.name);
                    var li = new Element('li');
                    if (repo.watchers > 1) {
-                      r.show(function (data) {
-                         console.log(data.repository.followers);
-                      });
+                      var r = new Request.JSON({
+                         url: "http://github.com/api/v2/json/repos/show/" + user.username + "/" + repo.name + "/watchers",
+                         method: "get",
+                         onComplete: function(d) {
+                            console.log("complete", d);
+                         },
+                     });
 
-                      li.set('text', repo.name + ": " + repo.watchers + " watchers.");
-                      $('repos').adopt(li);
+                      r.get();
+
+                     li.set('text', repo.name + ": " + repo.watchers + " watchers.");
+                     $('repos').adopt(li);
                    }
                 });
             });
